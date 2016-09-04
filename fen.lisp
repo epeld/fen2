@@ -132,6 +132,23 @@
 	(rank-coordinate (aref square 1))))
 
 
+(defun coordinates-to-square (coords)
+  "Convert a list of two coordinates into a square string"
+  (let ((f (first coords))
+	(r (second coords)))
+    (assert (<= 0 f 7))
+    (assert (<= 0 r 7))
+    (coerce (list (aref "abcdefgh" f)
+		  (aref "12345678" r))
+	    'string)))
+
+
+(defun verify-square (str)
+  "Sanity check for squares"
+  (assert (string= str (coordinates-to-square (square-coordinates str))))
+  t)
+
+
 (defun passant-square (fen) 
   "Extract the passant square from a FEN string"
   (square-coordinates (string-part 3 fen)))
