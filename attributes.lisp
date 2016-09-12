@@ -59,7 +59,7 @@
 
 
 (defun add-child (component child)
-  (jcall "add" component child))
+  (jcall "add" (wrapped-java-object component) (wrapped-java-object child)))
 
 
 (defmethod apply-attribute ((a children) c)
@@ -110,7 +110,7 @@
 
 
 (defmethod apply-attribute ((a layout) c)
-  (let ((pane (jcall "getContentPane" c)))
+  (let ((pane (java-call "getContentPane" c)))
     (set-layout pane (make-layout a pane))))
 
 
