@@ -151,7 +151,9 @@
 
 (defun passant-square (fen) 
   "Extract the passant square from a FEN string"
-  (square-coordinates (string-part 3 fen)))
+  (let ((square (string-part 3 fen)))
+    (unless (string= "-" square)
+      (square-coordinates square))))
 
 
 (defun half-move (fen)
@@ -172,4 +174,59 @@
 	:passant (passant-square fen)
 	:half-move (half-move fen)
 	:full-move (full-move fen)))
+
+
+;;
+;; Encoding routines
+;; 
+
+(defun half-move-string (pos)
+  "Encode the half-move of a position as a string"
+  (write-to-string (getf pos :half-move)))
+
+
+(defun full-move-string (pos)
+  "Encode the half-move of a position as a string"
+  (write-to-string (getf pos :full-move)))
+
+
+(defun passant-square-string (pos)
+  "Encode the passant square of a position as a string"
+  (let ((coords (getf pos :passant)))
+    (if coords
+	(coordinates-to-square coords)
+	"-")))
+
+
+(defun turn-string (pos)
+  "Encode the turn part of a position as a string"
+  (ecase (getf pos :turn)
+    (:white "w")
+    (:black "b")))
+
+
+(defun right-char (right)
+  (let ((ch (ecase (first right) (:kingside #\k) (:queenside #\q))))
+    (if (eq :white (second right))
+	(char-upcase ch)
+	ch)))
+
+
+(defun rights-string (pos)
+  "Encode the castling rights of a position as a string"
+  (coerce (mapcar #'right-char (getf pos :rights))
+	  'string))
+
+
+
+(defun pieces-string (pos)
+  (loop for r = 1 upto 7))
+
+(loop for r from 1 upto 7
+     (loop for c from 1 upto 7
+	with blanks = 0
+	do (let ((pc (aref pieces r c)))
+	     (if pc
+		 (do-something) ;handle blanks!
+		 (incf blanks)))))
 
