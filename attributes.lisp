@@ -4,46 +4,50 @@
 
 (defgeneric apply-attribute (t attribute))
 
-
 ;; 
-;; Title
-;; 
-
-(defclass title (attribute)
-  ((title-string :type 'string
-		 :initarg :title)))
-
-
-(defmethod apply-attribute ((a title) c)
-  (jcall "setTitle" c (slot-value a 'title-string)))
-
-
-(defun title (name)
-  (make-instance 'title 
-		 :title name))
-
-
-;; 
-;; Size
+;; Macro
 ;; 
 
-(defclass size (attribute)
-  ((width :type 'integer
-	  :initarg :width)
-   (height :type 'integer
-	   :initarg :height)))
+(defmacro defattr (name args &body body)
+  (let* ((inst (gensym))
+	 (setters (loop for arg in args collect
+		      `(setf (slot-value ,inst ',arg)
+			     ,arg))))
+    `(progn
+       (defclass ,name (attribute)
+	 ,(mapcar #'list args))
+     
+       (defun ,name ,args
+	 (let ((,inst (make-instance ',name)))
+	   ,@setters
+	   ,inst))
+     
+       (defmethod apply-attribute ((,inst ,name) component)
+	 (with-slots ,args ,inst
+	   ,@body)))))
 
 
-(defmethod apply-attribute ((a size) c)
-  (jcall "setSize" c 
-	 (slot-value a 'width)
-	 (slot-value a 'height)))
+;; 
+;; Simple Attributes
+;; 
 
+(defattr title (title-string)
+  (set-title component title-string))
 
-(defun size (width height)
-  (make-instance 'size 
-		 :width width
-		 :height height))
+(defattr size (width height)
+  (set-size component width height))
+
+(defattr text (text)
+  (set-text component text))
+
+(defattr color (color)
+  (set-foreground-color component (string-color color)))
+
+(defattr background-color (color)
+  (set-background-color component (string-color color)))
+
+(defattr opaque (bool)
+  (set-opaque component bool))
 
 ;; 
 ;; Children
@@ -67,21 +71,6 @@
   `(make-instance 'children
 		  :children (list ,@forms)))
 
-;; 
-;; Text
-;; 
-(defclass text (attribute)
-  ((text :type 'string
-	 :initarg :text)))
-
-
-(defmethod apply-attribute ((a text) c)
-  (jcall "setText" c (slot-value a 'text)))
-
-
-(defun text (text)
-  (make-instance 'text 
-		 :text text))
 
 ;; 
 ;; Layout
@@ -136,5 +125,3 @@
     (setf (slot-value lt 'axis)
 	  (or axis y-axis))
     lt))
-
-
