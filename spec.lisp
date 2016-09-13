@@ -44,27 +44,34 @@
 ;; Setter utils
 ;; 
 
-(defun set-visible (component visible)
-  ;(jcall "setVisible" window visible)
-  (java-call "setVisible" component visible))
+(defmacro defunj (name args &body body)
+  (assert (consp args))
+  (let ((component (gensym "component")))
+    `(defun ,name ,args
+       (let* ((,component (the component ,(car args)))
+	      (,(car args) (slot-value ,component 'instance)))
+	 ,@body))))
 
-(defun set-title (component title)
-  (java-call "setTitle" component title))
+(defunj set-visible (component visible)
+  (jcall "setVisible" component visible))
 
-(defun set-text (component text)
-  (java-call "setText" component text))
+(defunj set-title (component title)
+  (jcall "setTitle" component title))
 
-(defun set-size (component width height)
-  (java-call "setSize" component width height))
+(defunj set-text (component text)
+  (jcall "setText" component text))
 
-(defun set-opaque (component val)
-  (java-call "setOpaque" component val))
+(defunj set-size (component width height)
+  (jcall "setSize" component width height))
 
-(defun set-foreground-color (component color)
-  (java-call "setForeground" component color))
+(defunj set-opaque (component val)
+  (jcall "setOpaque" component val))
 
-(defun set-background-color (component color)
-  (java-call "setBackground" component color))
+(defunj set-foreground-color (component color)
+  (jcall "setForeground" component color))
+
+(defunj set-background-color (component color)
+  (jcall "setBackground" component color))
 
 
 ;; 
@@ -81,6 +88,10 @@
   (pack component)
   (set-visible component t))
 
+
+;; 
+;; Example
+;; 
 
 (show 
 
