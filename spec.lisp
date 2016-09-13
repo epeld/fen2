@@ -11,7 +11,10 @@
    (children :documentation "All the subcomponents of this component"
 	     :initarg :children
 	     :initform nil
-	     :accessor subcomponents)))
+	     :accessor subcomponents)
+   (metadata :documentation "Metadata that attributes can attach"
+	     :initform nil
+	     :accessor metadata)))
 
 (defmacro defcomponent (name qualified-import &optional (component-superclass 'component))
   (let ((var (gensym))
@@ -34,7 +37,12 @@
 
 (defun add-child (component child)
   "Add a child (sub) component"
-  (jcall "add" (wrapped-java-object component) (wrapped-java-object child))
+
+  (let ((aligned (get-meta child :aligned)))
+    (if aligned
+	(jcall "add" (wrapped-java-object component) (wrapped-java-object child) (resolve-alignment aligned))
+	(jcall "add" (wrapped-java-object component) (wrapped-java-object child))))
+  
   (setf (subcomponents component) 
 	(cons child (subcomponents component))))
 
@@ -83,10 +91,21 @@
 (defunj set-background-color (component color)
   (jcall "setBackground" component color))
 
+(defun add-meta (component key value)
+  "Add a new key-value pair to the component's metadata"
+  (setf (metadata component) 
+	(acons key value (metadata component))))
 
 ;; 
 ;; Utils 
 ;; 
+
+(defun get-meta (component key &optional default)
+  "Read a meta data value from the component"
+  (let ((m (assoc key (metadata component))))
+    (if m
+	(cdr m)
+	default)))
 
 (defun string-color (name)
   (jfield "java.awt.Color" name))
@@ -114,16 +133,24 @@
     
   (children
    
-   (button (text "Tryck pa knappen!")
-	   (color "green")
-	   (background-color "blue"))
+   (panel
+    (children (button (text "Tryck pa knappen!")
+		      (color "green")
+		      (background-color "blue")
+		      (aligned :west))
      
-   (label (text "Vaelj mat")
-	  (color "cyan"))
-     
-   (label (text "Hello, World!")
-	  (background-color "pink")
-	  (opaque t))
+	      (label (text "Vaelj mat")
+		     (color "cyan")
+		     (aligned :east))))
    
-   (label (text "How are you today?")
-	  (color "red")))))
+   (panel
+
+    (layout :flow)
+    (children
+
+     (label (text "Hello, World!")
+	    (background-color "pink")
+	    (opaque t))
+   
+     (label (text "How are you today?")
+	    (color "red")))))))
