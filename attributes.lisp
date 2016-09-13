@@ -2,7 +2,13 @@
 (defclass attribute ()
     ())
 
-(defgeneric apply-attribute (t attribute))
+(defgeneric apply-attribute (attribute t))
+
+(defun apply-attributes (component attributes)
+  "Apply a list of attributes to the component"
+  (the list attributes)
+  (dolist (attr attributes)
+    (apply-attribute attr component)))
 
 ;; 
 ;; Macro
@@ -56,11 +62,6 @@
 (defclass children (attribute)
   ((children :type 'list
 	     :initarg :children)))
-
-
-(defun add-child (component child)
-  (jcall "add" (wrapped-java-object component) (wrapped-java-object child)))
-
 
 (defmethod apply-attribute ((a children) c)
   (dolist (child (slot-value a 'children))

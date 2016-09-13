@@ -7,12 +7,15 @@
 (defclass component ()
   ((instance :documentation "The java wrapped java instance"
 	     :initarg :instance
-	     :reader wrapped-java-object)))
+	     :reader wrapped-java-object)
+   (children :documentation "All the subcomponents of this component"
+	     :initarg :children
+	     :initform nil
+	     :accessor subcomponents)))
 
 (defmacro defcomponent (name qualified-import &optional (component-superclass 'component))
   (let ((var (gensym))
-	(attrs (gensym))
-	(attr (gensym)))
+	(attrs (gensym)))
     
     `(progn
 
@@ -23,10 +26,18 @@
        (defun ,name (&rest ,attrs)
 	 (let ((,var (make-instance ',name 
 				    :instance (jnew ,qualified-import))))
-	   (dolist (,attr ,attrs)
-	     (apply-attribute ,attr ,var))
+	   
+	   (apply-attributes ,var ,attrs)
 
 	   ,var)))))
+
+
+(defun add-child (component child)
+  "Add a child (sub) component"
+  (jcall "add" (wrapped-java-object component) (wrapped-java-object child))
+  (setf (subcomponents component) 
+	(cons child (subcomponents component))))
+
 
 (defun java-call (name component &rest args)
   (apply #'jcall name (slot-value component 'instance) args))
@@ -45,12 +56,11 @@
 ;; 
 
 (defmacro defunj (name args &body body)
+  "Shorthand for defining a java call on a component"
   (assert (consp args))
-  (let ((component (gensym "component")))
-    `(defun ,name ,args
-       (let* ((,component (the component ,(car args)))
-	      (,(car args) (slot-value ,component 'instance)))
-	 ,@body))))
+  `(defun ,name ,args
+     (let ((,(car args) (wrapped-java-object (the component ,(car args)))))
+       ,@body)))
 
 (defunj set-visible (component visible)
   (jcall "setVisible" component visible))
@@ -81,8 +91,8 @@
 (defun string-color (name)
   (jfield "java.awt.Color" name))
 
-(defun pack (component)
-  (java-call "pack" component))
+(defunj pack (component)
+  (jcall "pack" component))
 
 (defun show (component)
   (pack component)
