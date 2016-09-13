@@ -82,6 +82,15 @@
 (defunj set-size (component width height)
   (jcall "setSize" component width height))
 
+(defunj set-maximum-size (component width height)
+  (jcall "setMaximumSize" component (jnew "java.awt.Dimension" width height)))
+
+(defunj set-minimum-size (component width height)
+  (jcall "setMinimumSize" component (jnew "java.awt.Dimension" width height)))
+
+(defunj set-preferred-size (component width height)
+  (jcall "setPreferredSize" component (jnew "java.awt.Dimension" width height)))
+
 (defunj set-opaque (component val)
   (jcall "setOpaque" component val))
 
@@ -133,33 +142,34 @@
 ;; Example
 ;; 
 
+;; TODO font name, font weight
+;; TODO onclick
+;; TODO pubsub subscribe
 
 (defparameter gui
   (show 
 
    (frame 
 
-    (title "Bae bakar!")
-    (size 600 400)
+    (title "Super Recipe-o-matic 3000!")
   
-    (layout :flow)
+    (layout :box)
     
     (children
    
      (panel
-      (children (button (text "Tryck pa knappen!")
-			(color "green")
-			(background-color "blue")
-			(name "superbutton")
-			(aligned :west))
-     
-		(label (text "Vaelj mat")
-		       (color "cyan")
-		       (name "superlabel")
-		       (aligned :east))))
+      (layout :flow)
+      (children (button (text "Browse Recipes")
+			(name "browse")
+			(action (lambda (x)
+				  (set-visible gui nil))))
+		
+		(button (text "Randomize!")
+			(name "randomize"))))
    
      (panel
-
+      (preferred-size 300 300)
+      
       (layout :flow)
       (children
 

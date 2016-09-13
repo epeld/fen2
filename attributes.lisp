@@ -49,6 +49,15 @@
 (defattr size (width height)
   (set-size component width height))
 
+(defattr minimum-size (width height)
+  (set-minimum-size component width height))
+
+(defattr preferred-size (width height)
+  (set-preferred-size component width height))
+
+(defattr maximum-size (width height)
+  (set-maximum-size component width height))
+
 (defattr text (text)
   (set-text component text))
 
@@ -57,6 +66,11 @@
 
 (defattr background-color (color)
   (set-background-color component (string-color color)))
+
+(quote (defmethod apply-attribute ((bg background-color) (b button))
+	 (set-background-color b (string-color (slot-value bg 'color)))
+	 (jcall "setContentAreaFilled" (wrapped-java-object b) nil)
+	 (jcall "setOpaque" (wrapped-java-object b) t)))
 
 (defattr opaque (bool)
   (set-opaque component bool))
