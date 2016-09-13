@@ -64,6 +64,20 @@
 (defattr aligned (keyword)
   (assert (member keyword (list :west :east :north :south)))
   (add-meta component :aligned keyword))
+
+(defattr name (name)
+  (add-meta component :name name))
+
+;; 
+;; Helpers
+;; 
+
+(defun get-name (component)
+  (get-meta component :name))
+
+(defun get-aligned (component)
+  (get-meta component :aligned))
+
 ;; 
 ;; Children
 ;;  

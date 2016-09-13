@@ -38,7 +38,7 @@
 (defun add-child (component child)
   "Add a child (sub) component"
 
-  (let ((aligned (get-meta child :aligned)))
+  (let ((aligned (get-aligned child)))
     (if aligned
 	(jcall "add" (wrapped-java-object component) (wrapped-java-object child) (resolve-alignment aligned))
 	(jcall "add" (wrapped-java-object component) (wrapped-java-object child))))
@@ -107,6 +107,16 @@
 	(cdr m)
 	default)))
 
+
+(defun find-component (root name)
+  (if (string-equal (get-name root) name)
+      root
+      (dolist (child (subcomponents root))
+	(let ((m (find-component child name)))
+	  (when m
+	    (return-from find-component m))))))
+
+
 (defun string-color (name)
   (jfield "java.awt.Color" name))
 
@@ -115,42 +125,47 @@
 
 (defun show (component)
   (pack component)
-  (set-visible component t))
+  (set-visible component t)
+  component)
 
 
 ;; 
 ;; Example
 ;; 
 
-(show 
 
- (frame 
+(defparameter gui
+  (show 
 
-  (title "Bae bakar!")
-  (size 600 400)
+   (frame 
+
+    (title "Bae bakar!")
+    (size 600 400)
   
-  (layout :flow)
-    
-  (children
-   
-   (panel
-    (children (button (text "Tryck pa knappen!")
-		      (color "green")
-		      (background-color "blue")
-		      (aligned :west))
-     
-	      (label (text "Vaelj mat")
-		     (color "cyan")
-		     (aligned :east))))
-   
-   (panel
-
     (layout :flow)
+    
     (children
-
-     (label (text "Hello, World!")
-	    (background-color "pink")
-	    (opaque t))
    
-     (label (text "How are you today?")
-	    (color "red")))))))
+     (panel
+      (children (button (text "Tryck pa knappen!")
+			(color "green")
+			(background-color "blue")
+			(name "superbutton")
+			(aligned :west))
+     
+		(label (text "Vaelj mat")
+		       (color "cyan")
+		       (name "superlabel")
+		       (aligned :east))))
+   
+     (panel
+
+      (layout :flow)
+      (children
+
+       (label (text "Hello, World!")
+	      (background-color "pink")
+	      (opaque t))
+   
+       (label (text "How are you today?")
+	      (color "red"))))))))
