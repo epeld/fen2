@@ -1,8 +1,8 @@
 
 (defun alert (parent message)
   "Show a JS-like alert with a message, given a parent frame"
-  (assert (not (null parent)))
-  (jstatic "showMessageDialog" "javax.swing.JOptionPane" parent message))
+  (the component parent)
+  (jstatic "showMessageDialog" "javax.swing.JOptionPane" (wrapped-java-object parent) message))
 
 
 (defun action-listener (fun)
