@@ -108,8 +108,15 @@
 
 
 (defmacro children (&rest forms)
-  `(make-instance 'children
-		  :children (list ,@forms)))
+  `(let ((parents (cons this-component parents)))
+     (declare (ignorable parents))
+     (flet ((parent (&optional (n 0))
+	      (if (< n 0)
+		  (nth (- (+ n 1)) (reverse parents))
+		  (nth n parents))))
+       
+       (make-instance 'children
+		      :children (list ,@forms)))))
 
 ;; 
 ;; Layout

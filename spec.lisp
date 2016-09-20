@@ -16,23 +16,30 @@
 	     :initform nil
 	     :accessor metadata)))
 
-(defmacro defcomponent (name qualified-import &optional (component-superclass 'component))
-  (let ((var (gensym))
-	(attrs (gensym)))
+
+(defun make-component (name attributes)
+  "Macro helper for instantiating new components"
+  `(let ((this-component (make-instance ',name)))
+     (apply-attributes this-component (list ,@attributes))
+     this-component))
+
+
+(defmacro defcomponent (name qualified-name &optional (component-superclass 'component))
+  (let ((attrs (gensym "attributes")))
     
     `(progn
 
-       ;; To allow for dispatching on this specific component:
        (defclass ,name (,component-superclass)
-	 ())
+	 ((qualified-name :documentation "The qualified java class name that this component wraps"
+			  :allocation :class
+			  :initform ,qualified-name
+			  :type :string
+			  :reader java-name)
+	  (instance :initform (jnew ,qualified-name))))
        
-       (defun ,name (&rest ,attrs)
-	 (let ((,var (make-instance ',name 
-				    :instance (jnew ,qualified-import))))
-	   
-	   (apply-attributes ,var ,attrs)
-
-	   ,var)))))
+       
+       (defmacro ,name (&rest ,attrs)
+	 (make-component ',name ,attrs)))))
 
 
 (defun add-child (component child)
@@ -126,6 +133,8 @@
 	    (return-from find-component m))))))
 
 
+
+
 (defun string-color (name)
   (jfield "java.awt.Color" name))
 
@@ -146,36 +155,40 @@
 ;; TODO onclick
 ;; TODO pubsub subscribe
 
-(defparameter gui
-  (show 
+(defmacro reify (markup)
+  "To reify a GUI means: create it and display it"
+  `(show (let (parents)
+	   ,markup)))
 
-   (frame 
+(reify
+ (frame 
 
-    (title "Super Recipe-o-matic 3000!")
+  (title "Super Recipe-o-matic 3000!")
   
-    (layout :box)
+  (layout :box)
     
-    (children
+  (children
    
-     (panel
-      (layout :flow)
-      (children (button (text "Browse Recipes")
-			(name "browse")
-			(action (lambda (x)
-				  (set-visible gui nil))))
+   (panel
+    (layout :flow)
+    (children (button (text "Browse Recipes")
+		      (name "browse")
+		      (action (lambda (x)
+				(declare (ignore x))
+				(set-visible gui nil))))
 		
-		(button (text "Randomize!")
-			(name "randomize"))))
+	      (button (text "Randomize!")
+		      (name "randomize"))))
    
-     (panel
-      (preferred-size 300 300)
+   (panel
+    (preferred-size 300 300)
       
-      (layout :flow)
-      (children
+    (layout :flow)
+    (children
 
-       (label (text "Hello, World!")
-	      (background-color "pink")
-	      (opaque t))
+     (label (text "Hello, World!")
+	    (background-color "pink")
+	    (opaque t))
    
-       (label (text "How are you today?")
-	      (color "red"))))))))
+     (label (text "How are you today?")
+	    (color "red")))))))
