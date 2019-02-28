@@ -3,13 +3,18 @@
 (defparameter example "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1")
 
 
-(defun color (ch)
+(defun color-from-character (ch)
   "Uses a character's case to determine if representing a black or white piece"
   (the character ch)
   (if (char= (char-upcase ch) ch) :white :black))
 
 
-(defun piece-type (ch)
+(defstruct (piece)
+  "Represents a chess piece"
+  (type :pawn :type keyword)
+  (color :white :type keyword))
+
+(defun piece-type-from-character (ch)
   "Determine which FEN-piece type this character represents"
   (the character ch)
   (ecase (char-downcase ch)
@@ -24,24 +29,24 @@
 (defun piece (ch)
   "Construct a piece from a character, e.g #\P -> (:pawn :white)"
   (the character ch)
-  (list (piece-type ch) (color ch)))
+  (make-piece (piece-type-from-character ch) (color-from-character ch)))
 
 
-(let ((digits (coerce "12345678" 'list)))
-  
-  (defun fen-blank-p (ch)
-    "Return whether the argument represents a blank sequence of characters"
-    (the character ch)
-    (let ((match (member ch digits)))
-      (when match
-	(+ 1 (- 8 (length match)))))))
+(defun fen-blank-p (ch)
+  "Return how many blanks a given character represents (or NIL if none)"
+  (let ((ix (search `(,ch) "12345678")))
+    (when ix
+      (1+ ix))))
+
 
 
 (defun pieces (fen)
   "Read out all pieces into a 2d array"
-  (the sequence fen)
+  (the string fen)
   (loop for ch across fen
-     with pieces = (make-array '(8 8) :initial-element nil)
+     with pieces = (make-array '(8 8)
+                               :initial-element nil
+                               :element-type '(or null piece))
      with rows = 0
      with cols = 0
 
@@ -219,14 +224,5 @@
 
 
 
-(defun pieces-string (pos)
-  (loop for r = 1 upto 7))
 
-(loop for r from 1 upto 7
-     (loop for c from 1 upto 7
-	with blanks = 0
-	do (let ((pc (aref pieces r c)))
-	     (if pc
-		 (do-something) ;handle blanks!
-		 (incf blanks)))))
 
