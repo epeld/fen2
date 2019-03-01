@@ -6,24 +6,22 @@
 (defun color-from-character (ch)
   "Uses a character's case to determine if representing a black or white piece"
   (the character ch)
-  (if (char= (char-upcase ch) ch) :white :black))
+  (the color
+       (if (char= (char-upcase ch) ch) :white :black)))
 
 
-(defstruct (piece)
-  "Represents a chess piece"
-  (type :pawn :type keyword)
-  (color :white :type keyword))
 
 (defun piece-type-from-character (ch)
   "Determine which FEN-piece type this character represents"
   (the character ch)
-  (ecase (char-downcase ch)
-    (#\p :pawn)
-    (#\b :bishop)
-    (#\r :rook)
-    (#\q :queen)
-    (#\k :king)
-    (#\n :knight)))
+  (the piece-type
+       (ecase (char-downcase ch)
+         (#\p :pawn)
+         (#\b :bishop)
+         (#\r :rook)
+         (#\q :queen)
+         (#\k :king)
+         (#\n :knight))))
 
 
 (defun piece (ch)
@@ -40,13 +38,11 @@
 
 
 
-(defun pieces (fen)
+(defun board (fen)
   "Read out all pieces into a 2d array"
   (the string fen)
   (loop for ch across fen
-     with pieces = (make-array '(8 8)
-                               :initial-element nil
-                               :element-type '(or null piece))
+     with pieces = (the board (make-board))
      with rows = 0
      with cols = 0
 
@@ -61,7 +57,7 @@
      else 
      do (let ((blanks (fen-blank-p ch)))
 	  (unless blanks
-	    (setf (aref pieces rows cols) (piece ch)))
+	    (setf (aref pieces (make-square rows cols)) (piece ch)))
 	  (incf cols (or blanks 1)))
       
      finally (progn (assert (eql 7 cols))
@@ -173,12 +169,12 @@
 
 (defun parse (fen)
   "Parse a fen string into a plist containing all its information"
-  (list :pieces (pieces fen)
-	:turn (turn fen)
-	:rights (rights fen)
-	:passant (passant-square fen)
-	:half-move (half-move fen)
-	:full-move (full-move fen)))
+  (make-chess-position :board (board fen)
+	               :turn (turn fen)
+	               :rights (rights fen)
+	               :passant (passant-square fen)
+	               :half-move (half-move fen)
+	               :full-move (full-move fen)))
 
 
 ;;
