@@ -1,4 +1,9 @@
 
+(deftype coord ()
+  '(integer 0 7))
+
+(deftype square ()
+  '(integer 0 63))
 
 (deftype color ()
   '(or (eql :white) (eql :black)))
