@@ -17,3 +17,13 @@
   (the coord
        (mod square 8)))
 
+
+
+(defun parse-square (string)
+  (let ((col (- (char-code (aref string 0)) (char-code #\a)))
+        (row (+ (char-code #\1) (- 7 (char-code (aref string 1))))))
+    (unless (<= 0 col 7)
+      (error "Invalid file for '~a'" string))
+    (unless (<= 0 row 7)
+      (error "Invalid rank for '~a'" string))
+    (make-square col row)))
