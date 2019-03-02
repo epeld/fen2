@@ -24,7 +24,7 @@
          (#\n :knight))))
 
 
-(defun piece (ch)
+(defun piece-from-character (ch)
   "Construct a piece from a character, e.g #\P -> (:pawn :white)"
   (the character ch)
   (make-piece (piece-type-from-character ch) (color-from-character ch)))
@@ -57,7 +57,7 @@
      else 
      do (let ((blanks (fen-blank-p ch)))
 	  (unless blanks
-	    (setf (aref pieces (make-square rows cols)) (piece ch)))
+	    (setf (aref pieces (make-square rows cols)) (piece-from-character ch)))
 	  (incf cols (or blanks 1)))
       
      finally (progn (assert (eql 7 cols))
