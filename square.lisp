@@ -20,6 +20,9 @@
 
 
 (defun parse-square (string)
+  "Parse out a chess square from a string like \"e4\" or similar"
+  (unless (eql (length string) 2)
+    (error "Not a valid square-string '~a'" string))
   (let ((col (- (char-code (aref string 0)) (char-code #\a)))
         (row (+ (char-code #\1) (- 7 (char-code (aref string 1))))))
     (unless (<= 0 col 7)
