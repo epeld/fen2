@@ -2,11 +2,31 @@
 (deftype move-type ()
   '(member :moves :takes))
 
+
+(deftype partial-square ()
+  '(cons (or null coord) (or null coord)))
+
+
+(defun row-source (row)
+  (cons nil row))
+
+(defun column-source (column)
+  (cons column nil))
+
+(defun column-source-p (source)
+  (and (consp source)
+       (not (null (car source)))))
+
+(defun row-source-p (source)
+  (and (consp source)
+       (not (null (cdr source)))))
+
+
 (defstruct (pgn-move)
   (piece-type :pawn :type piece-type)
   (move-type :moves :type move-type)
   (destination nil :type square)
-  (source nil :type (or null coord square)))
+  (source nil :type (or null partial-square square)))
 
 
 (defun parse-move (string)
@@ -60,8 +80,16 @@
 (defun parse-move-source (string &optional (offset 0))
   ;; If the second char isn't a chess rank..
   (if (null (read-rank (aref string (1+ offset)) nil))
-      ;; .. then the source is only given as a file
-      (values (read-file (aref string offset)) (1+ offset))
+      ;; .. then the source is only given as a file/rank
+      (cond ((read-file (aref string offset) nil)
+             (values (column-source (read-file (aref string offset))) (1+ offset)))
+
+            ((read-rank (aref string offset) nil)
+             (values (row-source (read-rank (aref string offset))) (1+ offset)))
+
+            (t
+             (error "Invalid source in move '~a'" string)))
+
       ;; otherwise, the source is given as a square
       (values (parse-square (subseq string offset (+ 2 offset))) (+ 2 offset))))
 
@@ -73,7 +101,7 @@
            (make-pgn-move :piece-type :pawn
                           :move-type :takes
                           :destination (parse-square (subseq string 2 4))
-                          :source (read-file ch)))
+                          :source (column-source (read-file ch))))
 
           ((read-rank ch2 nil)
            (cond ((eql 2 (length string))
@@ -101,3 +129,4 @@
 
 ;; TODO how to differentiate squares and files/ranks when storing??
 (parse-normal-move "Nd3xe4")
+(parse-normal-move "Ndxe4")
