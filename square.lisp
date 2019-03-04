@@ -26,9 +26,9 @@
   (let ((col (read-file (aref string 0) nil))
         (row (read-rank (aref string 1) nil)))
     (unless col
-      (error "Invalid file for '~a'" string))
+      (error "Invalid file when parsing square '~a'" string))
     (unless row
-      (error "Invalid rank for '~a'" string))
+      (error "Invalid rank when parsing square '~a'" string))
     (make-square col row)))
 
 
