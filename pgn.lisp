@@ -67,7 +67,32 @@
 
 
 (defun parse-pawn-move (string)
-  (error "not implemented"))
+  (let ((ch (aref string 0))
+        (ch2 (aref string 1)))
+    (cond ((eql #\x ch2)
+           (make-pgn-move :piece-type :pawn
+                          :move-type :takes
+                          :destination (parse-square (subseq string 2 4))
+                          :source (read-file ch)))
+
+          ((read-rank ch2 nil)
+           (cond ((eql 2 (length string))
+                  (make-pgn-move :piece-type :pawn
+                                 :move-type :moves
+                                 :destination (make-square (read-file ch) (read-rank ch2))
+                                 :source nil))
+
+                 ((eql #\x (aref string 2))
+                  (make-pgn-move :piece-type :pawn
+                                 :move-type :takes
+                                 :destination (parse-square (subseq string 3 5))
+                                 :source (make-square (read-file ch) (read-rank ch2))))
+
+                 (t
+                  (make-pgn-move :piece-type :pawn
+                                 :move-type :moves
+                                 :destination (parse-square (subseq string 2 4))
+                                 :source (make-square (read-file ch) (read-rank ch)))))))))
 
 
 ;; TODO how to differentiate squares and files/ranks when storing??
