@@ -3,4 +3,5 @@
     :depends-on ()
     :components ((:file "models")
                  (:file "square")
-                 (:file "fen")))
+                 (:file "fen")
+                 (:file "pgn")))
