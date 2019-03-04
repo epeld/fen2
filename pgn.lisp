@@ -127,6 +127,5 @@
                   (error "Invalid pawn move '~s'" string)))))))
 
 
-;; TODO how to differentiate squares and files/ranks when storing??
 (parse-normal-move "Nd3xe4")
 (parse-normal-move "Ndxe4")
