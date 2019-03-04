@@ -103,7 +103,7 @@
 (defun right (ch)
   "Convert a character to the castling right it represents"
   (the character ch)
-  (list (castling-side ch) (color ch)))
+  (list (castling-side ch) (color-from-character ch)))
 
 
 (defun rights (fen) 
