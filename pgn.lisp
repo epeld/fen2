@@ -82,17 +82,21 @@
                                  :destination (make-square (read-file ch) (read-rank ch2))
                                  :source nil))
 
-                 ((eql #\x (aref string 2))
+                 ((and (eql #\x (aref string 2))
+                       (eql 5 (length string)))
                   (make-pgn-move :piece-type :pawn
                                  :move-type :takes
                                  :destination (parse-square (subseq string 3 5))
                                  :source (make-square (read-file ch) (read-rank ch2))))
 
-                 (t
+                 ((eql 4 (length string))
                   (make-pgn-move :piece-type :pawn
                                  :move-type :moves
                                  :destination (parse-square (subseq string 2 4))
-                                 :source (make-square (read-file ch) (read-rank ch)))))))))
+                                 :source (make-square (read-file ch) (read-rank ch))))
+
+                 (t
+                  (error "Invalid pawn move '~s'" string)))))))
 
 
 ;; TODO how to differentiate squares and files/ranks when storing??
