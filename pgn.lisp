@@ -126,6 +126,3 @@
                  (t
                   (error "Invalid pawn move '~s'" string)))))))
 
-
-(parse-normal-move "Nd3xe4")
-(parse-normal-move "Ndxe4")
